@@ -35,7 +35,7 @@ jobs:
       - name: Get Postgres Container Name
         id: postgres_container_name
         run: |
-          container_name=$(docker ps --filter "image=postgres:latest" --format "{{.Names}}" | awk -F_ '{print $1}')
+          container_name=$(docker ps --format "{{.Names}}" | grep "postgres:latest" | awk '{print $1}')
           echo "::set-output name=name::$container_name"
 
       - name: Get PostgreSQL IP
