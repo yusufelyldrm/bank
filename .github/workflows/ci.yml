@@ -42,7 +42,10 @@ jobs:
         run: docker ps
       - name: Debug Database Connection
         run: |
-          echo "dbSourceIP: ${{ steps.postgres_ip.outputs.ip }}, dbSource: $dbSource"
+          cat db_config.txt
+          dbSource=$(grep "dbSource:" db_config.txt | awk -F ":" '{print $2}')
+          dbSourceIP=$(grep "dbSourceIP:" db_config.txt | awk -F ":" '{print $2}')
+          echo "dbSource: $dbSource, dbSourceIP: $dbSourceIP"
       - name: Run migrations
         run: migrate -path db/migration -database "postgresql://root:secret@${{ steps.postgres_ip.outputs.ip }}:5432/simple_bank?sslmode=disable" -verbose up
       - name: Test

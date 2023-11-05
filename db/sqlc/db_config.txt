@@ -1,0 +1,2 @@
+dbSource:postgresql://root:secret@192.168.215.2:5432/simple_bank?sslmode=disable
+dbSourceIP:192.168.215.2
