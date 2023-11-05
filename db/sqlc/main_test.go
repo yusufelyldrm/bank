@@ -21,14 +21,16 @@ const (
 func TestMain(m *testing.M) {
 	var err error
 
-	cmd := exec.Command("docker", "inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", "postgres")
-	cmdOutput, err := cmd.CombinedOutput()
+	dockerContainerNameCmd := exec.Command("docker", "ps", "--format", "{{.Names}}")
+	dockerContainerNameOutput, err := dockerContainerNameCmd.CombinedOutput()
 	if err != nil {
-		log.Fatal("Failed to execute 'docker inspect' command:", err)
+		log.Fatal("Failed to execute 'docker ps' command:", err)
 	}
+	dockerContainerName := strings.TrimSpace(string(dockerContainerNameOutput))
+	fmt.Println("Docker container name:", dockerContainerName)
 
-	fmt.Println("cmdOutput:", string(cmdOutput))
-
+	cmd := exec.Command("docker", "inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", dockerContainerName)
+	cmdOutput, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal("Failed to execute 'docker inspect' command:", err)
 	}
@@ -38,11 +40,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("Failed to get PostgreSQL container IP")
 	}
 
-	fmt.Println("dbSourceIP:", dbSourceIP)
-
 	dbSource := "postgresql://root:secret@" + dbSourceIP + ":5432/simple_bank?sslmode=disable"
-
-	fmt.Println("dbSource:", dbSource)
 
 	testDB, err = sql.Open(dbDriver, dbSource)
 	if err != nil {
