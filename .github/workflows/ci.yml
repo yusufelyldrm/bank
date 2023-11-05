@@ -29,13 +29,22 @@ jobs:
         with:
           go-version: ^1.19.4
 
-      - name: Get Postgres IP
+      - name: List Running Containers
+        run: docker ps
+
+      - name: Get Postgres Container Name
+        id: postgres_container_name
+        run: |
+          container_name=$(docker ps --filter "label=com.example.postgresql" --format "{{.Names}}")
+          echo "::set-output name=name::$container_name"
+
+      - name: Get PostgreSQL IP
         id: postgres_ip
         run: |
-          obtained_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)
+          container_name=${{ steps.postgres_container_name.outputs.name }}
+          obtained_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_name)
           echo "Obtained PostgreSQL IP address: $obtained_ip"
           echo "::set-output name=ip::$obtained_ip"
-    
 
       - name: Install golang-migrate
         run: |
