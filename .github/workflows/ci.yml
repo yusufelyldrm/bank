@@ -1,5 +1,4 @@
 name: ci-test
-
 on:
   push:
     branches: [main]
@@ -36,7 +35,7 @@ jobs:
       - name: Get Postgres Container Name
         id: postgres_container_name
         run: |
-          container_name=$(docker ps --filter "label=com.example.postgresql" --format "{{.Names}}" | head -n 1)
+          container_name=$(docker ps --filter "label=com.example.postgresql" --format "{{.Names}}" | grep "postgres:")
           echo "::set-output name=name::$container_name"
 
       - name: Get PostgreSQL IP
