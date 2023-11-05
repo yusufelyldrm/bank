@@ -33,9 +33,13 @@ jobs:
         id: postgres_ip
         run: echo "::set-output name=ip::$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)"
 
-      - name: Check Obtained IP Address
+      - name: Get Postgres IP
+        id: postgres_ip
         run: |
-          echo "Obtained PostgreSQL IP address: ${{ steps.postgres_ip.outputs.ip }}"
+          obtained_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)
+          echo "Obtained PostgreSQL IP address: $obtained_ip"
+          echo "::set-output name=ip::$obtained_ip"
+    
 
       - name: Install golang-migrate
         run: |
