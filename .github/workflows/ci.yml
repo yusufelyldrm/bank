@@ -31,10 +31,6 @@ jobs:
 
       - name: Get Postgres IP
         id: postgres_ip
-        run: echo "::set-output name=ip::$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)"
-
-      - name: Get Postgres IP
-        id: postgres_ip
         run: |
           obtained_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)
           echo "Obtained PostgreSQL IP address: $obtained_ip"
