@@ -4,10 +4,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:latest
@@ -17,36 +19,31 @@ jobs:
           POSTGRES_DB: simple_bank
         ports:
           - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+
     steps:
-      - name: Set up Go 1.x
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Go
         uses: actions/setup-go@v2
         with:
           go-version: ^1.19.4
-        id: go
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+
+      - name: Get Postgres IP
+        id: postgres_ip
+        run: echo "::set-output name=ip::$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)"
+
+      - name: Check Obtained IP Address
+        run: |
+          echo "Obtained PostgreSQL IP address: ${{ steps.postgres_ip.outputs.ip }}"
+
       - name: Install golang-migrate
         run: |
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.12.2/migrate.linux-amd64.tar.gz | tar xvz
           sudo mv migrate.linux-amd64 /usr/bin/migrate
-          which migrate
-      - name: Get Postgres IP
-        id: postgres_ip
-        run: echo "::set-output name=ip::$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)"
-      - name: Check PostgreSQL Container Status
-        run: docker ps
-      - name: Debug Database Connection
-        run: |
-          cat db_config.txt
-          dbSource=$(grep "dbSource:" db_config.txt | awk -F ":" '{print $2}')
-          dbSourceIP=$(grep "dbSourceIP:" db_config.txt | awk -F ":" '{print $2}')
-          echo "dbSource: $dbSource, dbSourceIP: $dbSourceIP"
-      - name: Run migrations
-        run: migrate -path db/migration -database "postgresql://root:secret@${{ steps.postgres_ip.outputs.ip }}:5432/simple_bank?sslmode=disable" -verbose up
-      - name: Test
+
+      - name: Apply Database Migrations
+        run: migrate -path db/migration -database "postgres://root:secret@${{ steps.postgres_ip.outputs.ip }}:5432/simple_bank?sslmode=disable" -verbose up
+
+      - name: Run Tests
         run: make test

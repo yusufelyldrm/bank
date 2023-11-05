@@ -44,11 +44,6 @@ func TestMain(m *testing.M) {
 
 	fmt.Println("dbSource:", dbSource)
 
-	// Write dbSource and dbSourceIP to a file
-	if err := os.WriteFile("db_config.txt", []byte("dbSource:"+dbSource+"\ndbSourceIP:"+dbSourceIP), 0644); err != nil {
-		log.Fatal("Failed to write db config file:", err)
-	}
-
 	testDB, err = sql.Open(dbDriver, dbSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
