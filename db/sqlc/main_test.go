@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
@@ -14,8 +15,7 @@ var testQueries *Queries
 var testDB *sql.DB
 
 const (
-	dbDriver    = "postgres"
-	dbSourceEnv = "POSTGRES_IP"
+	dbDriver = "postgres"
 )
 
 func TestMain(m *testing.M) {
@@ -23,6 +23,7 @@ func TestMain(m *testing.M) {
 
 	cmd := exec.Command("docker", "inspect", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}", "postgres")
 	cmdOutput, err := cmd.CombinedOutput()
+	fmt.Println("cmdOutput:", string(cmdOutput))
 	if err != nil {
 		log.Fatal("Failed to execute 'docker inspect' command:", err)
 	}

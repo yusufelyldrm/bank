@@ -38,6 +38,12 @@ jobs:
       - name: Get Postgres IP
         id: postgres_ip
         run: echo "::set-output name=ip::$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' postgres)"
+      - name: Check PostgreSQL Container Status
+        run: docker ps
+      - name: Debug Database Connection
+        run:
+          echo "dbSourceIP:
+            $dbSourceIP, dbSource: $dbSource"
       - name: Run migrations
         run: migrate -path db/migration -database "postgresql://root:secret@${{ steps.postgres_ip.outputs.ip }}:5432/simple_bank?sslmode=disable" -verbose up
       - name: Test
