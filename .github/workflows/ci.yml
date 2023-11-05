@@ -41,9 +41,8 @@ jobs:
       - name: Check PostgreSQL Container Status
         run: docker ps
       - name: Debug Database Connection
-        run:
-          echo "dbSourceIP:
-            $dbSourceIP, dbSource: $dbSource"
+        run: |
+          echo "dbSourceIP: ${{ steps.postgres_ip.outputs.ip }}, dbSource: $dbSource"
       - name: Run migrations
         run: migrate -path db/migration -database "postgresql://root:secret@${{ steps.postgres_ip.outputs.ip }}:5432/simple_bank?sslmode=disable" -verbose up
       - name: Test
